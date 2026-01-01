@@ -1,0 +1,61 @@
+# Studio Willow - Universal .gitignore
+# Covers: Unity, C#, Ren'Py, Node/Astro, Avalonia
+
+# =====================
+# Environment / Temp
+# =====================
+.env
+.env.production
+**.bak
+
+# =====================
+# Editors / IDEs
+# =====================
+.vscode/
+.vs/
+.idea/
+
+# =====================
+# Visual Studio / .NET
+# =====================
+**/bin/
+**/obj/
+**/out/
+*.db
+
+# =====================
+# Ren'Py
+# =====================
+/game/saves
+/game/cache
+/game/**/*.rpyc
+/game/**/*.rpymc
+/game/**/*.bak
+/game/**/*.new
+/game/**/*.old
+/errors.txt
+/files.txt
+/image_cache.txt
+/log.txt
+/save_dump.txt
+/traceback.txt
+/dialogue.tab
+/dialogue.txt
+/strings.json
+
+# =====================
+# Unity
+# Ensure .meta files are tracked
+# =====================
+!*.meta
+
+# =====================
+# Node / Astro
+# =====================
+node_modules/
+dist/
+.astro/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

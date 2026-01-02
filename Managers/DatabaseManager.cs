@@ -3,6 +3,8 @@ using Microsoft.Data.Sqlite;
 
 using HospitalSystem.Common;
 using HospitalSystem.Models;
+using System.Collections.Generic;
+using System;
 
 namespace HospitalSystem.Managers
 {
@@ -79,14 +81,14 @@ namespace HospitalSystem.Managers
             var command = _sqliteConnection.CreateCommand();
 
             command.CommandText = @"
-                SELECT FirstName, LastName, DateOfBirth, Phone 
+                SELECT FirstName, LastName, DateOfBirth, Phone
                 FROM Patients
                 WHERE Id = $id
             ";
             command.Parameters.AddWithValue("id", id);
 
             using(var reader = command.ExecuteReader())
-            {   
+            {
                 while (reader.Read())
                 {
                     var patientId = reader.GetInt32(reader.GetString(reader.GetOrdinal("Id")));
@@ -103,6 +105,54 @@ namespace HospitalSystem.Managers
                 CloseConnection();
                 return null;
             }
+        }
+
+        public static int GetPatientsCount()
+        {
+            OpenConnection();
+
+            var command = _sqliteConnection.CreateCommand();
+            command.CommandText = "SELECT COUNT(*) FROM Patients";
+
+            int count = Convert.ToInt32(command.ExecuteScalar());
+
+            CloseConnection();
+            return count;
+        }
+
+        public static List<Patient> GetAllPatientsPaginated(int offset, int pageSize)
+        {
+            OpenConnection();
+
+            var command = _sqliteConnection.CreateCommand();
+            command.CommandText = @"
+            SELECT *
+            FROM Patients
+            ORDER BY Id
+            LIMIT $limit OFFSET $offset
+            ";
+
+            command.Parameters.AddWithValue("limit", pageSize);
+            command.Parameters.AddWithValue("offset", offset);
+
+            var patients = new List<Patient>();
+
+            using (var reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    var patientId = reader.GetInt32(reader.GetOrdinal("Id"));
+                    var firstName = reader.GetString(reader.GetOrdinal("FirstName"));
+                    var lastName = reader.GetString(reader.GetOrdinal("LastName"));
+                    var dateOfBirth = reader.GetDateTime(reader.GetOrdinal("DateOfBirth"));
+                    var phone = reader.GetString(reader.GetOrdinal("Phone"));
+
+                    patients.Add( new Patient(patientId, firstName, lastName, dateOfBirth, phone) );
+                }
+            }
+
+            CloseConnection();
+            return patients;
         }
 
         public static bool AddPatient(Patient patient)
@@ -138,7 +188,7 @@ namespace HospitalSystem.Managers
 
             int rowsDeleted = command.ExecuteNonQuery();
 
-            CloseConnection();  
+            CloseConnection();
             return rowsDeleted > 0;
         }
 
@@ -152,7 +202,7 @@ namespace HospitalSystem.Managers
             return true;
         }
 
-        //============ PATIENTS ============
+        //============ DB ============
         private static void CreateDB()
         {
             OpenConnection();
@@ -168,16 +218,16 @@ namespace HospitalSystem.Managers
                     Role INTEGER NOT NULL
                 );
 
-                CREATE TABLE IF NOT EXISTS Patients (
+                CREATE TABLE  IF NOT EXISTS Patients (
                     Id INTEGER PRIMARY KEY,
-                    Firstname TEXT NOT NULL,
-                    Lastname TEXT NOT NULL,
+                    FirstName TEXT NOT NULL,
+                    LastName TEXT NOT NULL,
                     DateOfBirth TEXT NOT NULL,
                     Phone TEXT NOT NULL
                 );
 
                 INSERT INTO Users (Username, Password, Email, Role)
-                VALUES ('admin', 'admin', 'admin@hospital.com', 1);
+                VALUES ('admin', 'admin', 'admin@hospital.com', 0);
             ";
 
             command.ExecuteNonQuery();

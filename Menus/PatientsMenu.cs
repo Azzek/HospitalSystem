@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using HospitalSystem.Common;
 using HospitalSystem.Managers;
 using HospitalSystem.Models;
@@ -40,7 +41,8 @@ namespace HospitalSystem.Menus
                         DeletePatient();
                         break;
                     case 5 when role == AppDefs.UserRole.Admin:
-                        // GetAllPatients();
+                        GetAllPatients();
+                        break;
                     default:
                         Console.WriteLine("Choice should be an integer in range 0-4");
                         break;
@@ -48,7 +50,32 @@ namespace HospitalSystem.Menus
             }
         }
 
-        public static void GetPatient()
+        private static void RenderMenu(AppDefs.UserRole role)
+        {
+            Console.WriteLine("=== Patients Menu ===");
+            Console.WriteLine("1. Get patient details");
+            Console.WriteLine("2. Add patient");
+            Console.WriteLine("3. Update patient");
+
+            if (role == AppDefs.UserRole.Admin)
+            {
+                Console.WriteLine("4. Delete patient");
+                Console.WriteLine("5. Get all patients");
+            }
+
+            Console.WriteLine("0. Back");
+        }
+
+        public static void DisplayPatientDetails(Patient patient)
+        {
+            Console.WriteLine("=== Patient Details ===");
+            Console.WriteLine($"Patient ID: {patient.Id}");
+            Console.WriteLine($"Name: {patient.FirstName} {patient.LastName}");
+            Console.WriteLine($"Date of Birth: {patient.DateOfBirth::yyyymmdd}");
+            Console.WriteLine($"Phone: {patient.PhoneNumber}");
+        }
+
+        private static void GetPatient()
         {
             Console.Clear();
             Console.WriteLine("====== Get Patient Details ======");
@@ -69,7 +96,63 @@ namespace HospitalSystem.Menus
             
         }
 
-        public static void AddPatient()
+        private static void GetAllPatients()
+        {
+            int offset = 0;
+            const int pageSize = 10;
+
+            int totalPatients = PatientManager.GetPatientsCount();
+
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("====== All Patients ======");
+
+                var patients = PatientManager.GetAllPaginated(offset, pageSize);
+
+                if (patients.Count == 0)
+                {
+                    Console.WriteLine("No patients found.");
+                }
+                else
+                {
+                    foreach (Patient patient in patients)
+                    {
+                        DisplayPatientDetails(patient);
+                        Console.WriteLine("---------------------");
+                    }
+                }
+
+                Console.WriteLine();
+                Console.WriteLine("1 - Next | 2 - Previous | 3 - Quit");
+
+                int choice = Validator.GetValidInt("Select:");
+
+                switch (choice)
+                {
+                    case 1:
+                        if (offset + pageSize < totalPatients)
+                            offset += pageSize;
+                        break;
+
+                    case 2:
+                        if (offset - pageSize >= 0)
+                            offset -= pageSize;
+                        break;
+
+                    case 3:
+                        return;
+
+                    default:
+                        Console.WriteLine("Invalid choice.");
+                        Util.Pause();
+                        break;
+                }
+            }
+        }
+
+
+        private static void AddPatient()
         {
             Console.Clear();
             Console.WriteLine("=== Add patient ===");
@@ -205,31 +288,6 @@ namespace HospitalSystem.Menus
             }
             
             Util.Pause();
-        }
-
-        public static void DisplayPatientDetails(Patient patient)
-        {   
-            Console.WriteLine("=== Patient Details ===");
-            Console.WriteLine($"Patient ID: {patient.Id}");
-            Console.WriteLine($"Name: {patient.FirstName} {patient.LastName}");
-            Console.WriteLine($"Date of Birth: {patient.DateOfBirth::yyyymmdd}");
-            Console.WriteLine($"Phone: {patient.PhoneNumber}");
-        }
-
-        private static void RenderMenu(AppDefs.UserRole role)
-        {
-            Console.WriteLine("=== Patients Menu ===");
-            Console.WriteLine("1. Get patient details");
-            Console.WriteLine("2. Add patient");
-            Console.WriteLine("3. Update patient");
-
-            if (role == AppDefs.UserRole.Admin)
-            {
-                Console.WriteLine("4. Delete patient");
-                Console.WriteLine("5. Get all patients");
-            }
-
-            Console.WriteLine("0. Back");
         }
     }
 }

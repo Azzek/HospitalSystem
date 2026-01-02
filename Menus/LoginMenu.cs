@@ -24,8 +24,9 @@ namespace HospitalSystem.Menus
                 {
                     return logedUser;
                 }
-          
+
                 Console.WriteLine("Wrong cregentials! Try again.");
+                Util.Pause();
             }
         }
 

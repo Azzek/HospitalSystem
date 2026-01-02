@@ -9,16 +9,15 @@ namespace HospitalSystem
         private static readonly LoginMenu  _loginMenu = new LoginMenu();
         private static readonly MainMenu _mainMenu = new MainMenu();
         private static User? _loggedUser;
-        private static bool running = true;
+        private static bool _running = true;
 
         public static void Main(string[] args)
         {
-            DatabaseManager.Init();  
-            while (true)
+            DatabaseManager.Init();
+            while (_running)
             {
-                var logedUser = _loginMenu.ShowMenu();
-                bool confirm = _mainMenu.ShowMenu(logedUser);
-                
+                _loggedUser = _loginMenu.ShowMenu();
+                _running = _mainMenu.ShowMenu(_loggedUser);
             }
         }
     }
